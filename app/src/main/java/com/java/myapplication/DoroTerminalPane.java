@@ -29,6 +29,10 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
     private float touchDownY;
     private boolean touchMoved;
 
+    // 新增：记录组合键的锁定状态
+    private boolean ctrlPressed = false;
+    private boolean altPressed = false;
+
     public DoroTerminalPane(Context context, String shellPath, String cwd, String[] args, String[] env) {
         super(context);
         setBackgroundColor(Color.rgb(35, 35, 35));
@@ -79,10 +83,19 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
         terminalView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyCode));
     }
 
+    // 修改：切换 Ctrl 状态
     public void toggleCtrl() {
-        terminalView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CTRL_LEFT));
-        terminalView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_CTRL_LEFT));
+        ctrlPressed = !ctrlPressed;
     }
+
+    // 新增：切换 Alt 状态
+    public void toggleAlt() {
+        altPressed = !altPressed;
+    }
+
+    // 新增：获取状态，供 UI 判断高亮
+    public boolean isCtrlPressed() { return ctrlPressed; }
+    public boolean isAltPressed() { return altPressed; }
 
     public void close() {
         session.finishIfRunning();
@@ -118,10 +131,12 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
     @Override public boolean isTerminalViewSelected() { return terminalView.hasFocus(); }
     @Override public void copyModeChanged(boolean copyMode) { }
     @Override public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession session) { return false; }
-    @Override public boolean onKeyUp(int keyCode, KeyEvent e) { return false; }
+    @Override public boolean onKeyUp(int keyCode, KeyEvent e, TerminalSession session) { return false; }
     @Override public boolean onLongPress(MotionEvent event) { return false; }
-    @Override public boolean readControlKey() { return false; }
-    @Override public boolean readAltKey() { return false; }
+    
+    // 修改：返回真实的按键状态，让底层识别组合键
+    @Override public boolean readControlKey() { return ctrlPressed; }
+    @Override public boolean readAltKey() { return altPressed; }
     @Override public boolean readShiftKey() { return false; }
     @Override public boolean readFnKey() { return false; }
     @Override public boolean onCodePoint(int codePoint, boolean ctrlDown, TerminalSession session) { return false; }
