@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
@@ -29,7 +28,7 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
     private float touchDownY;
     private boolean touchMoved;
 
-    // 新增：记录组合键的锁定状态
+    // 记录组合键的锁定状态
     private boolean ctrlPressed = false;
     private boolean altPressed = false;
 
@@ -47,6 +46,7 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
         session = new TerminalSession(shellPath, cwd, args, env, 5000, this);
         terminalView.attachSession(session);
         terminalView.requestFocus();
+        
         terminalView.setOnTouchListener((v, event) -> {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
@@ -83,17 +83,14 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
         terminalView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyCode));
     }
 
-    // 修改：切换 Ctrl 状态
     public void toggleCtrl() {
         ctrlPressed = !ctrlPressed;
     }
 
-    // 新增：切换 Alt 状态
     public void toggleAlt() {
         altPressed = !altPressed;
     }
 
-    // 新增：获取状态，供 UI 判断高亮
     public boolean isCtrlPressed() { return ctrlPressed; }
     public boolean isAltPressed() { return altPressed; }
 
@@ -130,11 +127,11 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
     @Override public boolean shouldUseCtrlSpaceWorkaround() { return false; }
     @Override public boolean isTerminalViewSelected() { return terminalView.hasFocus(); }
     @Override public void copyModeChanged(boolean copyMode) { }
-    @Override public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession session) { return false; }
-    @Override public boolean onKeyUp(int keyCode, KeyEvent e, TerminalSession session) { return false; }
+    
+    // 移除了导致报错的 onKeyDown 和 onKeyUp
     @Override public boolean onLongPress(MotionEvent event) { return false; }
     
-    // 修改：返回真实的按键状态，让底层识别组合键
+    // 返回真实的按键状态，让底层识别组合键
     @Override public boolean readControlKey() { return ctrlPressed; }
     @Override public boolean readAltKey() { return altPressed; }
     @Override public boolean readShiftKey() { return false; }
