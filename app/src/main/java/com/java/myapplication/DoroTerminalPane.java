@@ -128,9 +128,8 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
     @Override public boolean isTerminalViewSelected() { return terminalView.hasFocus(); }
     @Override public void copyModeChanged(boolean copyMode) { }
     
-    // 按照底层库要求，必须保留这两个方法
+    // 只保留 onKeyDown，去掉 onKeyUp
     @Override public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession session) { return false; }
-    @Override public boolean onKeyUp(int keyCode, KeyEvent e, TerminalSession session) { return false; }
     
     @Override public boolean onLongPress(MotionEvent event) { return false; }
     
