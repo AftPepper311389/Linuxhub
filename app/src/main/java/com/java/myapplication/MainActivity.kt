@@ -253,7 +253,7 @@ private fun SetupApp(
                     progressMessage = "正在准备 Ubuntu 24.04"
                     page = SetupPage.INSTALLING
                     initialize(
-                        username, password, SetupCatalog.resolveSelection(emptySet()),
+                        username, password, emptySet(),
                         { state -> progress = state.percent; progressMessage = state.message },
                         { password = ""; progress = 100; page = SetupPage.COMPLETE },
                         { message -> password = ""; error = message; page = SetupPage.ACCOUNT }
