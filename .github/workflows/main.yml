@@ -23,13 +23,17 @@ jobs:
         run: |
           find . -name "*.gradle*" -exec sed -i 's/ndkVersion.*=.*"[0-9.]*"/ndkVersion = "26.1.10909125"/g' {} +
 
-      # 3. 补齐原作者漏掉的 X11 头文件（补齐 _X_HIDDEN 等宏）
+      # 3. 补齐原作者漏掉的 X11 头文件（补充了 _XFUNCPROTOBEGIN 等所有缺失宏）
       - name: Inject missing X11 header
         run: |
           mkdir -p termux_ubuntu_rebuild/termux_x11_source/lorie/src/main/cpp/xorgproto/include/X11
           cat << 'EOF' > termux_ubuntu_rebuild/termux_x11_source/lorie/src/main/cpp/xorgproto/include/X11/Xfuncproto.h
           #ifndef _XFUNCPROTO_H_
           #define _XFUNCPROTO_H_
+          
+          #define _XFUNCPROTOBEGIN
+          #define _XFUNCPROTOEND
+          
           #define _Xarg0
           #define _Xarg1 void *
           #define _Xarg2 void *, void *
@@ -41,6 +45,7 @@ jobs:
           #define _Xarg8 void *, void *, void *, void *, void *, void *, void *, void *
           #define _Xarg9 void *, void *, void *, void *, void *, void *, void *, void *, void *
           #define _Xarg10 void *, void *, void *, void *, void *, void *, void *, void *, void *, void *
+          
           #define _Xconst const
           #define _Xconst_val const
           #define _Xfunc
@@ -54,6 +59,7 @@ jobs:
           #define _X_NORETURN __attribute__((noreturn))
           #define _X_ATTRIBUTE_PRINTF(_x, _y)
           #define _X_ATTRIBUTE_UNUSED __attribute__((unused))
+          
           #endif
           EOF
 
