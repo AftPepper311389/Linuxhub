@@ -11,24 +11,53 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 1. 安装旧版 NDK
+      # 1. 安装旧版 NDK 26
       - name: Setup Android NDK
         run: |
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;26.1.10909125"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
           echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
 
-      # 2. 暴力修改所有 gradle 文件里的 ndk 版本为 26
+      # 2. 暴力替换所有 gradle 里的 ndk 版本为 26
       - name: Force NDK Version in Gradle files
         run: |
           find . -name "*.gradle*" -exec sed -i 's/ndkVersion.*=.*"[0-9.]*"/ndkVersion = "26.1.10909125"/g' {} +
 
-      # 3. 开始编译，强行注入 CMake 参数
+      # 3. 补齐原作者漏掉的 X11 头文件（精准空投）
+      - name: Inject missing X11 header
+        run: |
+          mkdir -p termux_ubuntu_rebuild/termux_x11_source/lorie/src/main/cpp/xorgproto/include/X11
+          cat << 'EOF' > termux_ubuntu_rebuild/termux_x11_source/lorie/src/main/cpp/xorgproto/include/X11/Xfuncproto.h
+          #ifndef _XFUNCPROTO_H_
+          #define _XFUNCPROTO_H_
+          #define _Xarg0
+          #define _Xarg1 void *
+          #define _Xarg2 void *, void *
+          #define _Xarg3 void *, void *, void *
+          #define _Xarg4 void *, void *, void *, void *
+          #define _Xarg5 void *, void *, void *, void *, void *
+          #define _Xarg6 void *, void *, void *, void *, void *, void *
+          #define _Xarg7 void *, void *, void *, void *, void *, void *, void *
+          #define _Xarg8 void *, void *, void *, void *, void *, void *, void *, void *
+          #define _Xarg9 void *, void *, void *, void *, void *, void *, void *, void *, void *
+          #define _Xarg10 void *, void *, void *, void *, void *, void *, void *, void *, void *, void *
+          #define _Xconst const
+          #define _Xconst_val const
+          #define _Xfunc
+          #define _Xfunc_val
+          #define _X_SIZED_INT_ char
+          #define _X_UNSIZED_INT_ char
+          #define _X_SIZED_ unsigned
+          #endif
+          EOF
+
+      # 4. 开始编译
       - name: Build with Gradle
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug -Dorg.gradle.project.android.ndkVersion=26.1.10909125 -DCMAKE_ANDROID_NDK=$ANDROID_NDK_HOME
 
+      # 5. 提取生成的 APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
