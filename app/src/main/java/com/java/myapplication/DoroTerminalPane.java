@@ -128,7 +128,10 @@ public final class DoroTerminalPane extends FrameLayout implements TerminalSessi
     @Override public boolean isTerminalViewSelected() { return terminalView.hasFocus(); }
     @Override public void copyModeChanged(boolean copyMode) { }
     
-    // 移除了导致报错的 onKeyDown 和 onKeyUp
+    // 按照底层库要求，必须保留这两个方法
+    @Override public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession session) { return false; }
+    @Override public boolean onKeyUp(int keyCode, KeyEvent e, TerminalSession session) { return false; }
+    
     @Override public boolean onLongPress(MotionEvent event) { return false; }
     
     // 返回真实的按键状态，让底层识别组合键
