@@ -23,7 +23,7 @@ jobs:
         run: |
           find . -name "*.gradle*" -exec sed -i 's/ndkVersion.*=.*"[0-9.]*"/ndkVersion = "26.1.10909125"/g' {} +
 
-      # 3. 补齐原作者漏掉的 X11 头文件（精准空投）
+      # 3. 补齐原作者漏掉的 X11 头文件（补齐 _X_HIDDEN 等宏）
       - name: Inject missing X11 header
         run: |
           mkdir -p termux_ubuntu_rebuild/termux_x11_source/lorie/src/main/cpp/xorgproto/include/X11
@@ -48,6 +48,12 @@ jobs:
           #define _X_SIZED_INT_ char
           #define _X_UNSIZED_INT_ char
           #define _X_SIZED_ unsigned
+          #define _X_HIDDEN __attribute__((visibility("hidden")))
+          #define _X_EXPORT __attribute__((visibility("default")))
+          #define _X_DEPRECATED __attribute__((deprecated))
+          #define _X_NORETURN __attribute__((noreturn))
+          #define _X_ATTRIBUTE_PRINTF(_x, _y)
+          #define _X_ATTRIBUTE_UNUSED __attribute__((unused))
           #endif
           EOF
 
